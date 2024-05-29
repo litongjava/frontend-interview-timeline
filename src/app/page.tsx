@@ -17,6 +17,7 @@ export default function Index() {
   let [trackIdSeq, setTrackIdSeq] = React.useState<number>(0);
   const [fileList, setFileList] = React.useState<any[]>([]);
   const [messageApi, contextHolder] = message.useMessage();
+  const [highlightTrackId, setHighlightTrackId] = React.useState<string | null>(null);
 
   const handleFileDragStart = (event: any, file: any) => {
     let transferData = {
@@ -36,6 +37,7 @@ export default function Index() {
   const handleTimelineClipDrop = (event: any) => {
     event.preventDefault();
     event.stopPropagation();
+    setHighlightTrackId(null); // 移除高亮
     const data = event.dataTransfer.getData("text");
     const dataObj = JSON.parse(data);
 
@@ -79,6 +81,7 @@ export default function Index() {
   const handleTrackDrop = (event: any, trackId?: string, index?: number) => {
     event.preventDefault();
     event.stopPropagation();
+    setHighlightTrackId(null); // 移除高亮
     const data = event.dataTransfer.getData("text");
     const dataObj = JSON.parse(data);
 
@@ -147,6 +150,7 @@ export default function Index() {
   const handleClipDrop = (event: any, targetTrackId: string, targetClipId: string) => {
     event.preventDefault();
     event.stopPropagation();
+    setHighlightTrackId(null); // 移除高亮
     const data = event.dataTransfer.getData("text");
     const dataObj = JSON.parse(data);
 
@@ -174,6 +178,14 @@ export default function Index() {
 
   const handleClipDragOver = (event: any) => {
     event.preventDefault();
+  };
+
+  const handleClipDragEnter = (event: any, trackId: string) => {
+    setHighlightTrackId(trackId);
+  };
+
+  const handleClipDragLeave = (event: any) => {
+    setHighlightTrackId(null);
   };
 
   const handleChange = (info: any) => {
@@ -254,7 +266,16 @@ export default function Index() {
               ) : (
                 tracks.filter(track => track.clips.length > 0).map((track, index) => (
                   <div key={track.id} style={{marginBottom: '10px'}}>
-                    <div style={{display: 'flex', flexDirection: 'row', border: '1px solid #000'}}>
+                    <div
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        border: '1px solid #000',
+                        background: highlightTrackId === track.id ? '#FFe000' : '#fff' // 高亮样式
+                      }}
+                      onDragEnter={(event) => handleClipDragEnter(event, track.id)}
+                      onDragLeave={handleClipDragLeave}
+                    >
                       <div style={{padding: '10px', background: '#eee', marginRight: '10px', width: '100px'}}>
                         {track.id}
                       </div>
