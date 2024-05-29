@@ -11,30 +11,30 @@ const {Dragger} = Upload;
 const {Header, Content, Sider} = Layout;
 
 export default function Index() {
-  const [tracks, setTracks] = React.useState<{ name: string, id: string }[]>([]);
+  const [tracks, setTracks] = React.useState<{ name: string, id: string, width: number }[]>([]);
   const [fileList, setFileList] = React.useState<any[]>([]);
   const [messageApi, contextHolder] = message.useMessage()
 
-  const handleDragStart = async (event: any, file: any) => {
+  const handleFileDragStart = async (event: any, file: any) => {
     let transferData = {
       name: file.name,
-      //duration: file.duration
+      width: 300
     }
     const data = JSON.stringify(transferData);
     console.log("data:", data)
     event.dataTransfer.setData("text", data);
   };
 
-  const handleDrop = (event: any) => {
+  const handleClicpDrop = (event: any) => {
     event.preventDefault();
     const data = event.dataTransfer.getData("text");
     console.log("data", data)
     const dataObj = JSON.parse(data);
-    const newTrack = [...tracks, {name: dataObj.name, id: `track-${tracks.length + 1}`}];
+    const newTrack = [...tracks, {name: dataObj.name, id: `track-${tracks.length + 1}`, width: dataObj.width}];
     setTracks(newTrack);
   };
 
-  const handleDragOver = (event: any) => {
+  const handleClicpDragOver = (event: any) => {
     event.preventDefault();
   };
 
@@ -92,7 +92,7 @@ export default function Index() {
                 key={index}
                 style={{marginTop: 10}}
                 draggable
-                onDragStart={(event) => handleDragStart(event, file)}
+                onDragStart={(event) => handleFileDragStart(event, file)}
               >
                 <video width="100%" controls>
                   <source src={URL.createObjectURL(file.originFileObj)} type="video/mp4"/>
@@ -109,8 +109,8 @@ export default function Index() {
           <Content style={{margin: '24px 16px 0', overflow: 'initial'}}>
             <div id="timeline"
                  style={{padding: 24, textAlign: 'center', minHeight: '100%', background: '#f0f2f5'}}
-                 onDrop={handleDrop}
-                 onDragOver={handleDragOver}
+                 onDrop={handleClicpDrop}
+                 onDragOver={handleClicpDragOver}
             >
               {tracks.length === 0 ? (
                 <div style={{padding: '50px', border: '1px dashed #d9d9d9', borderRadius: '4px', background: '#fff'}}>
@@ -119,12 +119,13 @@ export default function Index() {
               ) : (
                 tracks.map((track, index) => (
                   <div key={track.id} style={{border: '1px solid #000', marginBottom: '10px'}}>
-                    Track {index + 1}
                     <div style={{
-                      width: '100%',
+                      width: `${track.width}px`,
                       height: '30px',
                       background: '#b3d9ff',
-                      marginTop: '10px'
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap'
                     }}>
                       {track.name}
                     </div>
