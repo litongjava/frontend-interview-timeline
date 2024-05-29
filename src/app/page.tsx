@@ -33,21 +33,46 @@ export default function Index() {
     event.dataTransfer.setData("text", data);
   }
 
-
   const handleTimelineClipDrop = (event: any) => {
     event.preventDefault();
     event.stopPropagation();
     const data = event.dataTransfer.getData("text");
     const dataObj = JSON.parse(data);
 
-    let clip = {name: dataObj.name, id: 'clip-1', width: dataObj.width, xPosition: dataObj.xPosition};
-    let track = {id: `track-` + trackIdSeq++, clips: [clip]};
-    setTrackIdSeq(trackIdSeq)
     setTracks((prevTracks) => {
-      return [
-        ...prevTracks,
-        track,
-      ];
+      let sourceTrackId = "";
+      let sourceClipIndex = -1;
+
+      // 找到源轨道和剪辑索引
+      prevTracks.forEach(track => {
+        const clipIndex = track.clips.findIndex(clip => clip.id === dataObj.id);
+        if (clipIndex !== -1) {
+          sourceTrackId = track.id;
+          sourceClipIndex = clipIndex;
+        }
+      });
+
+      // 从源轨道移除剪辑
+      let newTracks = prevTracks.map(track => {
+        if (track.id === sourceTrackId) {
+          const newClips = track.clips.filter(clip => clip.id !== dataObj.id);
+          return {
+            ...track,
+            clips: newClips,
+          };
+        }
+        return track;
+      });
+
+      // 在新的轨道中添加剪辑
+      let clip = { name: dataObj.name, id: `clip-1`, width: dataObj.width, xPosition: dataObj.xPosition };
+      let track = { id: `track-${trackIdSeq++}`, clips: [clip] };
+      setTrackIdSeq(trackIdSeq);
+
+      newTracks.push(track);
+
+      // 过滤掉没有剪辑的轨道
+      return newTracks.filter(track => track.clips.length > 0);
     });
   };
 
@@ -60,6 +85,7 @@ export default function Index() {
     setTracks((prevTracks) => {
       let sourceTrackId = "";
       let sourceClipIndex = -1;
+
       // 找到源轨道和剪辑索引
       prevTracks.forEach(track => {
         const clipIndex = track.clips.findIndex(clip => clip.id === dataObj.id);
@@ -102,9 +128,10 @@ export default function Index() {
         });
       } else if (index !== undefined) {
         // 如果没有提供 trackId，在 index 位置插入新轨道并添加剪辑
-        let clip = {name: dataObj.name, id: 'clip-1', width: dataObj.width, xPosition: dataObj.xPosition};
-        let track = {id: "mid-" + trackIdSeq++, clips: [clip]};
-        setTrackIdSeq(trackIdSeq)
+        let clip = { name: dataObj.name, id: 'clip-1', width: dataObj.width, xPosition: dataObj.xPosition };
+        let track = { id: `track-${trackIdSeq++}`, clips: [clip] };
+        setTrackIdSeq(trackIdSeq);
+
         newTracks = [
           ...newTracks.slice(0, index + 1),
           track,
@@ -116,7 +143,6 @@ export default function Index() {
       return newTracks.filter(track => track.clips.length > 0);
     });
   };
-
 
   const handleClipDrop = (event: any, targetTrackId: string, targetClipId: string) => {
     event.preventDefault();
