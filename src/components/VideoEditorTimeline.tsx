@@ -255,7 +255,7 @@ const VideoEditorTimeline: React.FC<VideoEditorTimelineProps> = ({
                  onDragEnter={(event) => handleClipDragEnter(event, track.id)}
                  onDragLeave={handleClipDragLeave}
             >
-              <div style={{padding: '10px', background: '#eee', marginRight: '10px', width: '100px'}}>
+              <div style={{padding: '10px', background: '#eee',width: '100px'}}>
                 {track.id}
               </div>
               <div
