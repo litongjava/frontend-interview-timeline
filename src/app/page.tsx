@@ -5,6 +5,7 @@ import {Layout, message, Upload} from 'antd';
 import {InboxOutlined} from "@ant-design/icons";
 import {customEmptyUploadRequest} from "@/services/systemService";
 import {envProxy} from "next/dist/build/turborepo-access-trace/env";
+import VideoUploader from "@/components/VideoUploader";
 
 const {Dragger} = Upload;
 const {Header, Content, Sider} = Layout;
@@ -67,12 +68,10 @@ export default function Index() {
       });
 
       // 在新的轨道中添加剪辑
-      let clip = { name: dataObj.name, id: `clip-1`, width: dataObj.width, xPosition: dataObj.xPosition };
-      let track = { id: `track-${trackIdSeq++}`, clips: [clip] };
+      let clip = {name: dataObj.name, id: `clip-1`, width: dataObj.width, xPosition: dataObj.xPosition};
+      let track = {id: `track-${trackIdSeq++}`, clips: [clip]};
       setTrackIdSeq(trackIdSeq);
-
       newTracks.push(track);
-
       // 过滤掉没有剪辑的轨道
       return newTracks.filter(track => track.clips.length > 0);
     });
@@ -131,8 +130,8 @@ export default function Index() {
         });
       } else if (index !== undefined) {
         // 如果没有提供 trackId，在 index 位置插入新轨道并添加剪辑
-        let clip = { name: dataObj.name, id: 'clip-1', width: dataObj.width, xPosition: dataObj.xPosition };
-        let track = { id: `track-${trackIdSeq++}`, clips: [clip] };
+        let clip = {name: dataObj.name, id: 'clip-1', width: dataObj.width, xPosition: dataObj.xPosition};
+        let track = {id: `track-${trackIdSeq++}`, clips: [clip]};
         setTrackIdSeq(trackIdSeq);
 
         newTracks = [
@@ -217,36 +216,7 @@ export default function Index() {
 
       <Layout style={{height: '100vh'}}>
         <Sider width={200} style={{background: '#fff'}}>
-          <div>
-            <Dragger
-              name="file"
-              multiple={true}
-              onChange={handleChange}
-              showUploadList={false}
-              customRequest={customEmptyUploadRequest}
-              accept="video/*"
-            >
-              <p className="ant-upload-drag-icon">
-                <InboxOutlined/>
-              </p>
-              <p className="ant-upload-text">点击上传或拖拽文件到这里</p>
-            </Dragger>
-          </div>
-          <div>
-            {fileList.map((file, index) => (
-              <div
-                key={index}
-                style={{marginTop: 10}}
-                draggable
-                onDragStart={(event) => handleFileDragStart(event, file)}
-              >
-                <video width="100%" controls>
-                  <source src={URL.createObjectURL(file.originFileObj)} type="video/mp4"/>
-                  您的浏览器不支持 video 标签。
-                </video>
-              </div>
-            ))}
-          </div>
+          <VideoUploader fileList={fileList} setFileList={setFileList} handleFileDragStart={handleFileDragStart}/>
         </Sider>
         <Layout>
           <Header style={{padding: 0, background: '#fff'}}>
