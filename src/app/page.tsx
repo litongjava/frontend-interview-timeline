@@ -4,32 +4,38 @@ import React from 'react';
 import {Layout, message, Upload} from 'antd';
 // @ts-ignore
 import {InboxOutlined} from "@ant-design/icons";
+import {customEmptyUploadRequest} from "@/services/systemService";
 //import 'antd/dist/antd.css';
 
 const {Dragger} = Upload;
 const {Header, Content, Sider} = Layout;
 
 export default function Index() {
-  const [tracks, setTracks] = React.useState<{ file: any, id: string }[]>([]);
+  const [tracks, setTracks] = React.useState<{ name: string, id: string }[]>([]);
   const [fileList, setFileList] = React.useState<any[]>([]);
   const [messageApi, contextHolder] = message.useMessage()
 
+  const handleDragStart = async (event: any, file: any) => {
+    let transferData = {
+      name: file.name,
+      //duration: file.duration
+    }
+    const data = JSON.stringify(transferData);
+    console.log("data:", data)
+    event.dataTransfer.setData("text", data);
+  };
 
   const handleDrop = (event: any) => {
     event.preventDefault();
     const data = event.dataTransfer.getData("text");
-    const file = JSON.parse(data);
-    const newTrack = [...tracks, {file, id: `track-${tracks.length + 1}`}];
+    console.log("data", data)
+    const dataObj = JSON.parse(data);
+    const newTrack = [...tracks, {name: dataObj.name, id: `track-${tracks.length + 1}`}];
     setTracks(newTrack);
   };
 
   const handleDragOver = (event: any) => {
     event.preventDefault();
-  };
-
-  const handleDragStart = (event: any, file: any) => {
-    const data = JSON.stringify(file);
-    event.dataTransfer.setData("text", data);
   };
 
 
@@ -44,6 +50,10 @@ export default function Index() {
         // Component will show file.url as link
         file.url = file.response.url;
       }
+      // if (file.originFileObj) {
+      //   const duration = getVideoDuration(file.originFileObj);
+      //   file.duration = duration
+      // }
       return file;
     });
 
@@ -67,6 +77,7 @@ export default function Index() {
               multiple={true}
               onChange={handleChange}
               showUploadList={false}
+              customRequest={customEmptyUploadRequest}
               accept="video/*"
             >
               <p className="ant-upload-drag-icon">
@@ -115,7 +126,7 @@ export default function Index() {
                       background: '#b3d9ff',
                       marginTop: '10px'
                     }}>
-                      {track.file.name}
+                      {track.name}
                     </div>
                   </div>
                 ))
